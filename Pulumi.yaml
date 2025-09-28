@@ -3,8 +3,5 @@ description: reanimating my personal infrastructure...as code
 runtime:
   name: yaml
   options:
-    compiler: /home/ejs/.cargo/bin/nickel export -f yaml main.ncl
-config:
-  pulumi:tags:
-    value:
-      pulumi:template: go
+    compiler: cue export
+  
