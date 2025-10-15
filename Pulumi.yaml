@@ -1,7 +1,0 @@
-name: unicorns.wtf
-description: reanimating my personal infrastructure...as code
-runtime:
-  name: yaml
-  options:
-    compiler: cue export
-  
