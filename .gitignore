@@ -12,17 +12,23 @@
 
 !README.md
 
+# one document directory to consolidate them all
+!docs/**/*.md
+
 # go
 !go.sum
 !go.mod
 
-# one document directory to consolidate them all
-!docs/**/*.md
+# cue
+!cue.mod
+!*.cue
 
 # track
 !*.yaml
-!*.ncl
 !*.go
+
+# random scripts
+!scripts/opnsense.py
 
 # but not these files or (sub)directories
 !*/
@@ -34,7 +40,8 @@ venv/
 **/.terraform/**
 
 # ignore experimentation and in-progress development
-exp/**
+exp/
+.exp/
 
 # no logs
 logs/
