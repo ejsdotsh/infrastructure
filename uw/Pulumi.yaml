@@ -1,6 +1,9 @@
 name: uw
 description: reanimating my personal infrastructure
-runtime: yaml
+runtime:
+  name: yaml
+  options:
+    compiler: cue export
 config: {'pulumi:tags': {value: {'pulumi:template': tree/HEAD/yaml}}}
 variables: {}
 resources: {}
