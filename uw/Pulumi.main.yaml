@@ -1,4 +1,0 @@
-config:
-  pulumi:template: https://github.com/pulumi/templates/tree/head/yaml
-environment:
-  - uw/esc
