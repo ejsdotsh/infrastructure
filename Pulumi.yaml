@@ -1,0 +1,4 @@
+name: uw
+description: reanimating my personal infrastructure
+runtime: go
+main: src/main.go
