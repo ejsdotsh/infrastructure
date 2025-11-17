@@ -17,6 +17,7 @@
 
 # go
 !go.sum
+!go.sum.license
 !go.mod
 
 # cue
