@@ -6,6 +6,7 @@ replace github.com/pulumi/pulumi-terraform-provider/sdks/go/netbox/v5 => ./sdks/
 
 require (
 	github.com/danslimmon/donothing v0.2.0
+	github.com/pulumi/pulumi-digitalocean/sdk/v4 v4.55.0
 	github.com/pulumi/pulumi-terraform-provider/sdks/go/netbox/v5 v5.0.0-00010101000000-000000000000
 	github.com/pulumi/pulumi/sdk/v3 v3.207.0
 )
@@ -70,7 +71,6 @@ require (
 	github.com/skeema/knownhosts v1.3.0 // indirect
 	github.com/spf13/cobra v1.8.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/texttheater/golang-levenshtein v1.0.1 // indirect
 	github.com/uber/jaeger-client-go v2.30.0+incompatible // indirect
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
