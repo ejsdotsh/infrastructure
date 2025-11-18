@@ -6,9 +6,3 @@ name: uw
 description: reanimating my personal infrastructure
 runtime: go
 main: src/main.go
-packages:
-  netbox:
-    source: terraform-provider
-    version: 1.0.2
-    parameters:
-      - e-breuninger/netbox
