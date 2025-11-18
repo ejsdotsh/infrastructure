@@ -5,6 +5,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	unicornsdns "github.com/ejsdotsh/infrastructure/src/dns"
 	// ntbx "github.com/ejsdotsh/infrastructure/src/netbox"
 
@@ -13,6 +16,12 @@ import (
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
+		readmeBytes, err := os.ReadFile("../README.md")
+		if err != nil {
+			return fmt.Errorf("failed to read readme: %w", err)
+		}
+		ctx.Export("readme", pulumi.String(string(readmeBytes)))
+
 		// Check that required environment variables are set
 		if err := checkRequiredEnvVars(); err != nil {
 			return err
