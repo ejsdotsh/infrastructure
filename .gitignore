@@ -6,7 +6,7 @@
 !/.gitignore
 !/.gitkeep
 
-!LICENSES/
+!LICENSES/*.txt
 !VERSION
 !Makefile
 
