@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-name: uw
-description: reanimating my personal infrastructure
+name: infrastructure
+description: reanimating my personal infrastructure...
 runtime: go
 main: src/main.go
