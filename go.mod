@@ -6,12 +6,9 @@ module github.com/ejsdotsh/infrastructure
 
 go 1.25.4
 
-replace github.com/pulumi/pulumi-terraform-provider/sdks/go/netbox/v5 => ./sdks/netbox
-
 require (
 	github.com/danslimmon/donothing v0.2.0
 	github.com/pulumi/pulumi-digitalocean/sdk/v4 v4.55.0
-	github.com/pulumi/pulumi-terraform-provider/sdks/go/netbox/v5 v5.0.0-00010101000000-000000000000
 	github.com/pulumi/pulumi/sdk/v3 v3.207.0
 )
 

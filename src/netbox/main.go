@@ -2,12 +2,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+// Package netbox is for managing Netbox resources
+// this is currently placeholder code; SDK generation doesn't work correctly
+// // 	"github.com/pulumi/pulumi-terraform-provider/sdks/go/netbox/v5/netbox"
 package netbox
 
 // import (
 // 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 
-// 	"github.com/pulumi/pulumi-terraform-provider/sdks/go/netbox/v5/netbox"
 // )
 
 // var (
