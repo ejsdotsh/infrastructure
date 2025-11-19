@@ -15,6 +15,11 @@ func ManageDomains(ctx *pulumi.Context) error {
 		return err
 	}
 
+	// Create domains in Linode
+	if err := manageLinodeDNS(ctx); err != nil {
+		return err
+	}
+
 	return nil
 }
 
