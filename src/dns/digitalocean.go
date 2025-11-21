@@ -108,7 +108,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 		Ttl:    pulumi.Int(3600),
 		Type:   pulumi.String(digitalocean.RecordTypeTXT),
 		Value:  pulumi.String("v=spf1 include:_spf.protonmail.ch ~all"),
-	}, pulumi.Protect(true))
+	})
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 		Ttl:    pulumi.Int(3600),
 		Type:   pulumi.String(digitalocean.RecordTypeTXT),
 		Value:  pulumi.String("v=DMARC1; p=quarantine"),
-	}, pulumi.Protect(true))
+	})
 	if err != nil {
 		return err
 	}
@@ -130,7 +130,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 		Ttl:    pulumi.Int(43200),
 		Type:   pulumi.String(digitalocean.RecordTypeCNAME),
 		Value:  pulumi.String("protonmail.domainkey.dryktxtupmrp5coofwzuib32r7l7msvlngqicqwbweu4szlvekd5q.domains.proton.ch."),
-	}, pulumi.Protect(true))
+	})
 	if err != nil {
 		return err
 	}
@@ -140,7 +140,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 		Ttl:    pulumi.Int(43200),
 		Type:   pulumi.String(digitalocean.RecordTypeCNAME),
 		Value:  pulumi.String("protonmail2.domainkey.dryktxtupmrp5coofwzuib32r7l7msvlngqicqwbweu4szlvekd5q.domains.proton.ch."),
-	}, pulumi.Protect(true))
+	})
 	if err != nil {
 		return err
 	}
@@ -150,7 +150,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 		Ttl:    pulumi.Int(43200),
 		Type:   pulumi.String(digitalocean.RecordTypeCNAME),
 		Value:  pulumi.String("protonmail3.domainkey.dryktxtupmrp5coofwzuib32r7l7msvlngqicqwbweu4szlvekd5q.domains.proton.ch."),
-	}, pulumi.Protect(true))
+	})
 	if err != nil {
 		return err
 	}
