@@ -7,7 +7,6 @@ module github.com/ejsdotsh/infrastructure
 go 1.25.4
 
 require (
-	github.com/danslimmon/donothing v0.2.0
 	github.com/pulumi/pulumi-digitalocean/sdk/v4 v4.55.0
 	github.com/pulumi/pulumi-linode/sdk/v5 v5.5.0
 	github.com/pulumi/pulumi/sdk/v3 v3.208.0
