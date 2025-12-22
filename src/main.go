@@ -9,6 +9,8 @@ import (
 	"os"
 
 	unicornsdns "github.com/ejsdotsh/infrastructure/src/dns"
+	"github.com/ejsdotsh/infrastructure/src/machines"
+
 	// ntbx "github.com/ejsdotsh/infrastructure/src/netbox"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -16,14 +18,11 @@ import (
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
-		readmeBytes, err := os.ReadFile("../README.md")
-		if err != nil {
-			return fmt.Errorf("failed to read readme: %w", err)
-		}
-		ctx.Export("readme", pulumi.String(string(readmeBytes)))
 
 		// Check that required environment variables are set
+		ctx.Log.Info(("=== PHASE 1: load ENV vars ==="), nil)
 		if err := checkRequiredEnvVars(); err != nil {
+			ctx.Log.Error((fmt.Sprintf("=== PHASE 1: ERROR ===\n\n%v", err)), nil)
 			return err
 		}
 
@@ -34,20 +33,25 @@ func main() {
 		// }
 
 		// Create DNS domains, MX, CNAME DKIM records
+		ctx.Log.Info(("=== PHASE 2: manage DNS ==="), nil)
 		if err := unicornsdns.ManageDomains(ctx); err != nil {
+			ctx.Log.Error((fmt.Sprintf("=== PHASE 2: ERROR ===\n\n%v", err)), nil)
 			return err
 		}
 
-		// TODO Create unicornsLANd infrastructure
-		// 		Provision and configure OPNSense firewall
-		// 		Provision and configure Proxmox VE
-		// 		Provision and configure NAS
-		// 		Provision and configure switches
+		// Create the Machines
+		ctx.Log.Info(("=== PHASE 3: manage machines ==="), nil)
+		if err := machines.ManageMachines(ctx); err != nil {
+			ctx.Log.Error((fmt.Sprintf("=== PHASE 3: ERROR ===\n\n%v", err)), nil)
+			return err
+		}
 
-		// Provision and configure octopik3s Kubernetes cluster
-		// if err := unicornsland.SetupUnicornsLANd(ctx); err != nil {
-		// 	return err
-		// }
+		// write a README to the project
+		readmeBytes, err := os.ReadFile("../README.md")
+		if err != nil {
+			return fmt.Errorf("failed to read readme: %w", err)
+		}
+		ctx.Export("readme", pulumi.String(string(readmeBytes)))
 
 		return nil
 	})
