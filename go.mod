@@ -7,7 +7,6 @@ module github.com/ejsdotsh/infrastructure
 go 1.25.4
 
 require (
-	github.com/muhlba91/pulumi-proxmoxve/sdk/v7 v7.11.0
 	github.com/pulumi/pulumi-digitalocean/sdk/v4 v4.55.0
 	github.com/pulumi/pulumi-linode/sdk/v5 v5.5.0
 	github.com/pulumi/pulumi/sdk/v3 v3.213.0
@@ -40,7 +39,7 @@ require (
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.7.0 // indirect
-	github.com/go-git/go-git/v5 v5.16.4 // indirect
+	github.com/go-git/go-git/v5 v5.16.5 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/glog v1.2.5 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
