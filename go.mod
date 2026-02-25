@@ -7,7 +7,6 @@ module github.com/ejsdotsh/infrastructure
 go 1.25.4
 
 require (
-	github.com/muhlba91/pulumi-proxmoxve/sdk/v7 v7.11.0
 	github.com/pulumi/pulumi-digitalocean/sdk/v4 v4.55.0
 	github.com/pulumi/pulumi-linode/sdk/v5 v5.5.0
 	github.com/pulumi/pulumi/sdk/v3 v3.213.0
@@ -33,7 +32,7 @@ require (
 	github.com/clipperhouse/displaywidth v0.6.2 // indirect
 	github.com/clipperhouse/stringish v0.1.1 // indirect
 	github.com/clipperhouse/uax29/v2 v2.3.0 // indirect
-	github.com/cloudflare/circl v1.6.1 // indirect
+	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/cyphar/filepath-securejoin v0.6.1 // indirect
 	github.com/djherbis/times v1.6.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
