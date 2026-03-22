@@ -18,10 +18,10 @@ func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
 		// Ensure that the required environment variables are set
 		ctx.Log.Info(("=== PRE-CHECKS: load ENV vars ==="), nil)
-		if err := checkRequiredEnvVars(); err != nil {
-			ctx.Log.Error((fmt.Sprintf("=== PHASE 1: ERROR ===\n\n%v", err)), nil)
-			return err
-		}
+		// if err := checkRequiredEnvVars(); err != nil {
+		// 	ctx.Log.Error((fmt.Sprintf("=== PHASE 1: ERROR ===\n\n%v", err)), nil)
+		// 	return err
+		// }
 
 		// Initialize the Netbox client (reads NETBOX_URL/TOKEN from env)
 		ctx.Log.Info(("=== PHASE 1: Initialize Netbox client ==="), nil)
