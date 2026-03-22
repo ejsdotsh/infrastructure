@@ -61,7 +61,7 @@ func NewDOMachine(
 	comp.Droplet = droplet
 
 	// Create an A record for the droplet's IPv4 address
-	_, err = digitalocean.NewDomainRecord(ctx, name+"-dns-ipv4", &digitalocean.DomainRecordArgs{
+	_, err = digitalocean.NewDnsRecord(ctx, name+"-dns-ipv4", &digitalocean.DnsRecordArgs{
 		Domain: domain.Name,
 		Name:   pulumi.String("web"),
 		Type:   pulumi.String("A"),
@@ -72,7 +72,7 @@ func NewDOMachine(
 	}
 
 	// Create an AAAA record for the droplet's IPv6 address
-	_, err = digitalocean.NewDomainRecord(ctx, name+"-dns-ipv6", &digitalocean.DomainRecordArgs{
+	_, err = digitalocean.NewDnsRecord(ctx, name+"-dns-ipv6", &digitalocean.DnsRecordArgs{
 		Domain: domain.Name,
 		Name:   pulumi.String("web"),
 		Type:   pulumi.String("AAAA"),
@@ -89,19 +89,19 @@ func NewDOMachine(
 	return comp, nil
 }
 
-func main() {
-	pulumi.Run(func(ctx *pulumi.Context) error {
-		_, err := NewDOMachine(ctx, "mywebinfra", &NewMachineArgs{
-			DomainName: pulumi.String("example.com"),
-			IpAddress:  pulumi.String("203.0.113.1"),
-			Region:     pulumi.String("nyc3"),
-			Size:       pulumi.String("s-1vcpu-1gb"),
-			Image:      pulumi.String("alpine-3.15.0"),
-			SshKey:     pulumi.String("your-ssh-key"),
-		})
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-}
+// func main() {
+// 	pulumi.Run(func(ctx *pulumi.Context) error {
+// 		_, err := NewDOMachine(ctx, "mywebinfra", &NewMachineArgs{
+// 			DomainName: pulumi.String("example.com"),
+// 			IpAddress:  pulumi.String("203.0.113.1"),
+// 			Region:     pulumi.String("nyc3"),
+// 			Size:       pulumi.String("s-1vcpu-1gb"),
+// 			Image:      pulumi.String("alpine-3.15.0"),
+// 			SshKey:     pulumi.String("your-ssh-key"),
+// 		})
+// 		if err != nil {
+// 			return err
+// 		}
+// 		return nil
+// 	})
+// }

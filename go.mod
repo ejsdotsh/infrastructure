@@ -11,6 +11,7 @@ require (
 	github.com/pulumi/pulumi-digitalocean/sdk/v4 v4.55.0
 	github.com/pulumi/pulumi-linode/sdk/v5 v5.5.0
 	github.com/pulumi/pulumi/sdk/v3 v3.213.0
+	resty.dev/v3 v3.0.0-beta.6
 )
 
 require (
@@ -101,5 +102,4 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	lukechampine.com/frand v1.5.1 // indirect
-	resty.dev/v3 v3.0.0-beta.6 // indirect
 )

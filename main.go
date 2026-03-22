@@ -5,14 +5,11 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"os"
 
-	"github.com/ejsdotsh/infrastructure/src/pkg/dns"
-	"github.com/ejsdotsh/infrastructure/src/pkg/machines"
-
-	"github.com/ejsdotsh/infrastructure/src/internal/netbox"
+	"github.com/ejsdotsh/infrastructure/src/dns"
+	"github.com/ejsdotsh/infrastructure/src/machines"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
@@ -28,21 +25,21 @@ func main() {
 
 		// Initialize the Netbox client (reads NETBOX_URL/TOKEN from env)
 		ctx.Log.Info(("=== PHASE 1: Initialize Netbox client ==="), nil)
-		ntbx := netbox.NewClient()
-		cctx := context.Background()
+		// ntbx := netbox.NewClient()
+		// cctx := context.Background()
 
 		ctx.Log.Info("Getting DNS Domains and Records from Netbox", nil)
-		zones, err := ntbx.ListZones(cctx)
-		if err != nil {
-			ctx.Log.Error((fmt.Sprintf("=== ERROR pulling from Netbox ===\n\n%v", err)), nil)
-			return err
-		}
+		// zones, err := ntbx.ListZones(cctx)
+		// if err != nil {
+		// 	ctx.Log.Error((fmt.Sprintf("=== ERROR pulling from Netbox ===\n\n%v", err)), nil)
+		// 	return err
+		// }
 
 		// Create DNS domains, MX, CNAME DKIM records
 		ctx.Log.Info(("=== PHASE 2: manage DNS ==="), nil)
-		for _, z := range zones {
-			prov := providerFromTags([]string{}) // empty slice
-		}
+		// for _, z := range zones {
+		// 	prov := providerFromTags([]string{}) // empty slice
+		// }
 		if err := dns.ManageDomains(ctx); err != nil {
 			ctx.Log.Error((fmt.Sprintf("=== PHASE 2: ERROR ===\n\n%v", err)), nil)
 			return err

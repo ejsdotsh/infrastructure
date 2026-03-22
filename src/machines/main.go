@@ -43,11 +43,11 @@ func ManageMachines(ctx *pulumi.Context) error {
 			if err := manageLinodeMachines(ctx, machine); err != nil {
 				return err
 			}
-		case "do":
-			// fmt.Printf("manageDOMachines(%v)\n", machine)
-			if err := manageDOMachines(ctx, machine); err != nil {
-				return err
-			}
+			// case "do":
+			// 	// fmt.Printf("manageDOMachines(%v)\n", machine)
+			// 	if err := manageDOMachines(ctx, machine); err != nil {
+			// 		return err
+			// 	}
 
 		}
 	}
