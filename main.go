@@ -8,33 +8,39 @@ import (
 	"fmt"
 	"os"
 
-	unicornsdns "github.com/ejsdotsh/infrastructure/src/dns"
+	"github.com/ejsdotsh/infrastructure/src/dns"
 	"github.com/ejsdotsh/infrastructure/src/machines"
-
-	// ntbx "github.com/ejsdotsh/infrastructure/src/netbox"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
+		// Ensure that the required environment variables are set
+		ctx.Log.Info(("=== PRE-CHECKS: load ENV vars ==="), nil)
+		// if err := checkRequiredEnvVars(); err != nil {
+		// 	ctx.Log.Error((fmt.Sprintf("=== PHASE 1: ERROR ===\n\n%v", err)), nil)
+		// 	return err
+		// }
 
-		// Check that required environment variables are set
-		ctx.Log.Info(("=== PHASE 1: load ENV vars ==="), nil)
-		if err := checkRequiredEnvVars(); err != nil {
-			ctx.Log.Error((fmt.Sprintf("=== PHASE 1: ERROR ===\n\n%v", err)), nil)
-			return err
-		}
+		// Initialize the Netbox client (reads NETBOX_URL/TOKEN from env)
+		ctx.Log.Info(("=== PHASE 1: Initialize Netbox client ==="), nil)
+		// ntbx := netbox.NewClient()
+		// cctx := context.Background()
 
-		// TODO - the netbox provider import/sdk creation doesn't work as desired.
-		// Create infrastructure in Netbox Cloud
-		// if err := ntbx.SetupNetbox(ctx); err != nil {
+		ctx.Log.Info("Getting DNS Domains and Records from Netbox", nil)
+		// zones, err := ntbx.ListZones(cctx)
+		// if err != nil {
+		// 	ctx.Log.Error((fmt.Sprintf("=== ERROR pulling from Netbox ===\n\n%v", err)), nil)
 		// 	return err
 		// }
 
 		// Create DNS domains, MX, CNAME DKIM records
 		ctx.Log.Info(("=== PHASE 2: manage DNS ==="), nil)
-		if err := unicornsdns.ManageDomains(ctx); err != nil {
+		// for _, z := range zones {
+		// 	prov := providerFromTags([]string{}) // empty slice
+		// }
+		if err := dns.ManageDomains(ctx); err != nil {
 			ctx.Log.Error((fmt.Sprintf("=== PHASE 2: ERROR ===\n\n%v", err)), nil)
 			return err
 		}
@@ -47,7 +53,7 @@ func main() {
 		}
 
 		// write a README to the project
-		readmeBytes, err := os.ReadFile("../README.md")
+		readmeBytes, err := os.ReadFile("README.md")
 		if err != nil {
 			return fmt.Errorf("failed to read readme: %w", err)
 		}
