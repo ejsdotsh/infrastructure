@@ -53,7 +53,7 @@ func main() {
 		}
 
 		// write a README to the project
-		readmeBytes, err := os.ReadFile("../README.md")
+		readmeBytes, err := os.ReadFile("README.md")
 		if err != nil {
 			return fmt.Errorf("failed to read readme: %w", err)
 		}
