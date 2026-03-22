@@ -1,14 +1,29 @@
+i// SPDX-FileCopyrightText: 2025 e.j. sahala <ej@saha.la>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package machines
 
 import (
+	"fmt"
+
 	"github.com/pulumi/pulumi-linode/sdk/v5/go/linode"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-// manageLinodeMachines is based on the initial import of the resource.
+// manageLinodeMachines creates a LinodeMachine component for the given machine config.
 func manageLinodeMachines(ctx *pulumi.Context, machine Machine) error {
-
-	_, err := linode.NewInstance(ctx, "machine-linode01", &linode.InstanceArgs{
+	_, err := NewLinodeMachine(ctx, fmt.Sprintf("machine-%s", string(machine.Name)), &LinodeMachineArgs{
+		// The original resource name must be preserved for alias matching.
+		InstanceResourceName: "machine-linode01",
+		Label:                machine.Name,
+		Region:               machine.Region,
+		InstanceType:         machine.Size,
+		IPv4Addresses: pulumi.StringArray{
+			machine.IP4[0],
+			machine.IP4[1],
+		},
+		PrivateIP: machine.PrivateIP,
 		Alerts: &linode.InstanceAlertsArgs{
 			Cpu:           pulumi.Int(90),
 			Io:            pulumi.Int(10000),
@@ -50,20 +65,10 @@ func manageLinodeMachines(ctx *pulumi.Context, machine Machine) error {
 				Size:       pulumi.Int(512),
 			},
 		},
-		Ipv4s: pulumi.StringArray{
-			machine.IP4[0],
-			machine.IP4[1],
-		},
-		Label:     machine.Name,
-		PrivateIp: machine.PrivateIP,
-		Region:    machine.Region,
-		Type:      machine.Size,
-	}, pulumi.Protect(true))
-
-	ctx.Export("linodeIP", machine.IP4[0])
-	ctx.Export("linodeIPv6", machine.IP6[0])
+	})
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
