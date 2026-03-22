@@ -5,15 +5,10 @@
 name: infrastructure
 description: reanimating my personal infrastructure...
 runtime: go
-main: src/main.go
+main: main.go
 config:
   pulumi:autonaming:
     value:
       mode: default
 
 variables:
-  node:
-  fn::invoke:
-    function: proxmoxve:index/getNode:getNode
-    arguments:
-      nodeName: "192.168.50.21"

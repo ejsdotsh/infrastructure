@@ -11,10 +11,17 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 )
 
-// Domain is a simple definition of a DNS domain.
+const (
+	// DomainComponentType is the ID of the Pulumi component type.
+	DomainComponentType = "ejsdotsh:dns:Domain"
+)
+
+// Domain is a simple definition for a high-level DNS resource.
 type Domain struct {
-	Name       string `json:"name"` // Domain name
-	DNSRecords []DomainRecord
+	pulumi.ResourceState
+
+	// Name       string `json:"name"` // Domain name
+	// DNSRecords []DomainRecord
 }
 
 // DomainRecord represents a DNS record.
@@ -49,4 +56,15 @@ func ManageDomains(ctx *pulumi.Context) error {
 	}
 
 	return nil
+}
+
+// NewDomain is a high-level abstraction that creates a Domain resource with
+// the appropriate provider.
+func NewDomain(ctx *pulumi.Context, name string, args *DomainSpec, opts ...pulumi.ResourceOption) (*Domain, error) {
+	component := &Domain{}
+	if err := ctx.RegisterComponentResourceV2(DomainComponentType, name, component, opts...); err != nil {
+		return nil, err
+	}
+
+	return component, nil
 }

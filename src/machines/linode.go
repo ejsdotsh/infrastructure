@@ -59,6 +59,9 @@ func manageLinodeMachines(ctx *pulumi.Context, machine Machine) error {
 		Region:    machine.Region,
 		Type:      machine.Size,
 	}, pulumi.Protect(true))
+
+	ctx.Export("linodeIP", machine.IP4[0])
+	ctx.Export("linodeIPv6", machine.IP6[0])
 	if err != nil {
 		return err
 	}

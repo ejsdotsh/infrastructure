@@ -44,25 +44,13 @@ func ManageMachines(ctx *pulumi.Context) error {
 				return err
 			}
 		case "do":
-			fmt.Printf("manageDOMachines(%v)\n", machine)
-		case "pve":
-			fmt.Printf("managePVEMachines(%v)\n", machine)
+			// fmt.Printf("manageDOMachines(%v)\n", machine)
+			if err := manageDOMachines(ctx, machine); err != nil {
+				return err
+			}
 
 		}
 	}
-
-	// Provision and configure OPNSense firewall
-
-	// Provision and configure Proxmox VE
-	// provider, err := setupProxmoxProvider(ctx)
-	// if err != nil {
-	// 	return nil
-	// }
-
-	// err = createProxmoxMachines(ctx, provider)
-	// if err != nil {
-	// 	return err
-	// }
 
 	// Provision and configure NAS
 	// Provision and configure switches

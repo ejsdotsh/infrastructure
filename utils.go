@@ -13,9 +13,11 @@ import (
 func checkRequiredEnvVars() error {
 	required := []string{
 		"DIGITALOCEAN_TOKEN",
-		"PROXMOX_VE_ENDPOINT",
-		"PROXMOX_VE_USERNAME",
-		"PROXMOX_VE_PASSWORD",
+		"NETBOX_TOKEN",
+		"NETBOX_URL",
+		// "PROXMOX_VE_ENDPOINT",
+		// "PROXMOX_VE_USERNAME",
+		// "PROXMOX_VE_PASSWORD",
 	}
 	missingVars := []string{}
 	for _, v := range required {
