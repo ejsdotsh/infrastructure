@@ -8,164 +8,140 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ejsdotsh/infrastructure/src/loader"
+
 	"github.com/pulumi/pulumi-digitalocean/sdk/v4/go/digitalocean"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-var (
-	doDomains = []string{
-		"panemorfos.me",
-		"pik3s.io",
-		"unicorns.wtf",
-	}
-)
+// DigitalOceanDNS is a component resource that groups a DigitalOcean domain
+// and its associated DNS records under a single logical unit.
+type DigitalOceanDNS struct {
+	pulumi.ResourceState
 
-// manageDigitalOceanDNS creates the domains in DigitalOcean, as well as their MX and NS records.
-func manageDigitalOceanDNS(ctx *pulumi.Context) error {
-	for _, domainName := range doDomains {
-		// Replace dots with hyphens for resource naming
-		resourceName := fmt.Sprintf("domain-%s", strings.ReplaceAll(domainName, ".", "-"))
-		_default, err := digitalocean.NewDomain(ctx, resourceName, &digitalocean.DomainArgs{
-			Name: pulumi.String(domainName),
-		})
-		if err != nil {
-			fmt.Printf("there was an error: %v\n", err)
-			return err
-		}
-		// Add MX records
-		resourceName = fmt.Sprintf("domain-record-%s", strings.ReplaceAll(domainName, ".", "-"))
-		_, err = digitalocean.NewDnsRecord(ctx, resourceName+"-mx1", &digitalocean.DnsRecordArgs{
-			Domain:   _default.Name,
+	DomainName pulumi.StringOutput `pulumi:"domainName"`
+}
+
+// NewDigitalOceanDNS creates a new DigitalOceanDNS component from a loader.DODomain.
+func NewDigitalOceanDNS(ctx *pulumi.Context, name string, domain loader.DODomain, opts ...pulumi.ResourceOption) (*DigitalOceanDNS, error) {
+	component := &DigitalOceanDNS{}
+	if err := ctx.RegisterComponentResource("ejsdotsh:dns:DigitalOceanDNS", name, component, opts...); err != nil {
+		return nil, err
+	}
+
+	// Derive consistent resource name from the domain.
+	domainSlug := strings.ReplaceAll(domain.Domain, ".", "-")
+
+	// Create the DigitalOcean domain.
+	d, err := digitalocean.NewDomain(ctx, fmt.Sprintf("do-domain-%s", domainSlug), &digitalocean.DomainArgs{
+		Name: pulumi.String(domain.Domain),
+	}, pulumi.Parent(component))
+	if err != nil {
+		return nil, err
+	}
+
+	// Create MX records.
+	for i, mx := range domain.MX {
+		_, err := digitalocean.NewDnsRecord(ctx, fmt.Sprintf("do-dns-%s-mx-%d", domainSlug, i), &digitalocean.DnsRecordArgs{
+			Domain:   d.Name,
 			Type:     pulumi.String(digitalocean.RecordTypeMX),
 			Name:     pulumi.String("@"),
-			Value:    pulumi.String("mail.protonmail.ch."),
-			Priority: pulumi.Int(10),
+			Value:    pulumi.String(mx.Target),
+			Priority: pulumi.Int(mx.Priority),
 			Ttl:      pulumi.Int(14400),
-		})
+		}, pulumi.Parent(component))
 		if err != nil {
-			fmt.Printf("there was an error: %v\n", err)
-			return err
+			return nil, err
 		}
-		_, err = digitalocean.NewDnsRecord(ctx, resourceName+"-mx2", &digitalocean.DnsRecordArgs{
-			Domain:   _default.Name,
-			Type:     pulumi.String(digitalocean.RecordTypeMX),
-			Name:     pulumi.String("@"),
-			Value:    pulumi.String("mailsec.protonmail.ch."),
-			Priority: pulumi.Int(20),
-			Ttl:      pulumi.Int(14400),
-		})
+	}
+
+	// Create NS records.
+	for i, ns := range domain.NS {
+		_, err := digitalocean.NewDnsRecord(ctx, fmt.Sprintf("do-dns-%s-ns-%d", domainSlug, i), &digitalocean.DnsRecordArgs{
+			Domain: d.Name,
+			Type:   pulumi.String(digitalocean.RecordTypeNS),
+			Name:   pulumi.String("@"),
+			Value:  pulumi.String(ns.Target),
+			Ttl:    pulumi.Int(1800),
+		}, pulumi.Parent(component))
 		if err != nil {
-			fmt.Printf("there was an error: %v\n", err)
-			return err
-		}
-		// Add NS records
-		for i := 1; i <= 3; i++ {
-			_, err = digitalocean.NewDnsRecord(ctx, resourceName+fmt.Sprintf("-ns%d", i), &digitalocean.DnsRecordArgs{
-				Domain: _default.Name,
-				Type:   pulumi.String(digitalocean.RecordTypeNS),
-				Name:   pulumi.String("@"),
-				Value:  pulumi.String(fmt.Sprintf("ns%d.digitalocean.com.", i)),
-				Ttl:    pulumi.Int(1800),
-			})
-			if err != nil {
-				fmt.Printf("there was an error: %v\n", err)
-				return err
-			}
+			return nil, err
 		}
 	}
 
-	// Add records for imported verify, SPF, DKIM, and DMARC
-	_, err := digitalocean.NewDnsRecord(ctx, "domain-record-panemorfos-me-txt-protonmail-verification", &digitalocean.DnsRecordArgs{
-		Domain: pulumi.String("panemorfos.me"),
-		Name:   pulumi.String("@"),
-		Ttl:    pulumi.Int(3600),
-		Type:   pulumi.String(digitalocean.RecordTypeTXT),
-		Value:  pulumi.String("protonmail-verification=fdfc3be39cbcc7aad30939cc525ca6c3ee38f61b"),
-	})
-	if err != nil {
-		fmt.Printf("there was an error: %v\n", err)
-		return err
-	}
-	_, err = digitalocean.NewDnsRecord(ctx, "domain-record-pik3s-io-txt-protonmail-verification", &digitalocean.DnsRecordArgs{
-		Domain: pulumi.String("pik3s.io"),
-		Name:   pulumi.String("@"),
-		Ttl:    pulumi.Int(3600),
-		Type:   pulumi.String(digitalocean.RecordTypeTXT),
-		Value:  pulumi.String("protonmail-verification=91adc44d657ca96a9c7327bfe7b9b2dc80b8261b"),
-	})
-	if err != nil {
-		fmt.Printf("there was an error: %v\n", err)
-		return err
-	}
-	_, err = digitalocean.NewDnsRecord(ctx, "domain-record-unicorns-wtf-txt-protonmail-verification", &digitalocean.DnsRecordArgs{
-		Domain: pulumi.String("unicorns.wtf"),
-		Name:   pulumi.String("@"),
-		Ttl:    pulumi.Int(3600),
-		Type:   pulumi.String(digitalocean.RecordTypeTXT),
-		Value:  pulumi.String("protonmail-verification=e35f918ddaea3eae5ccb81ff300e7dd90713d5e7"),
-	})
-	if err != nil {
-		fmt.Printf("there was an error: %v\n", err)
-		return err
+	// Create TXT records.
+	for i, txt := range domain.TXT {
+		args := &digitalocean.DnsRecordArgs{
+			Domain: d.Name,
+			Type:   pulumi.String(digitalocean.RecordTypeTXT),
+			Name:   pulumi.String("@"),
+			Value:  pulumi.String(txt.Target),
+			Ttl:    pulumi.Int(3600),
+		}
+		if txt.Name != "" {
+			args.Name = pulumi.String(txt.Name)
+		}
+		_, err := digitalocean.NewDnsRecord(ctx, fmt.Sprintf("do-dns-%s-txt-%d", domainSlug, i), args, pulumi.Parent(component))
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	_, err = digitalocean.NewDnsRecord(ctx, "domain-record-unicorns-wtf-txt-spf", &digitalocean.DnsRecordArgs{
-		Domain: pulumi.String("unicorns.wtf"),
-		Name:   pulumi.String("@"),
-		Ttl:    pulumi.Int(3600),
-		Type:   pulumi.String(digitalocean.RecordTypeTXT),
-		Value:  pulumi.String("v=spf1 include:_spf.protonmail.ch ~all"),
-	})
-	if err != nil {
-		fmt.Printf("there was an error: %v\n", err)
-		return err
-	}
-	_, err = digitalocean.NewDnsRecord(ctx, "domain-record-unicorns-wtf-txt-dmarc", &digitalocean.DnsRecordArgs{
-		Domain: pulumi.String("unicorns.wtf"),
-		Name:   pulumi.String("_dmarc"),
-		Ttl:    pulumi.Int(3600),
-		Type:   pulumi.String(digitalocean.RecordTypeTXT),
-		Value:  pulumi.String("v=DMARC1; p=quarantine"),
-	})
-	if err != nil {
-		fmt.Printf("there was an error: %v\n", err)
-		return err
+	// Create CNAME records.
+	for i, cname := range domain.CNAME {
+		_, err := digitalocean.NewDnsRecord(ctx, fmt.Sprintf("do-dns-%s-cname-%d", domainSlug, i), &digitalocean.DnsRecordArgs{
+			Domain: d.Name,
+			Type:   pulumi.String(digitalocean.RecordTypeCNAME),
+			Name:   pulumi.String(cname.Name),
+			Value:  pulumi.String(cname.Target),
+			Ttl:    pulumi.Int(43200),
+		}, pulumi.Parent(component))
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	// DKIM CNAME records
-	_, err = digitalocean.NewDnsRecord(ctx, "domain-record-unicorns-wtf-cname-dkim1", &digitalocean.DnsRecordArgs{
-		Domain: pulumi.String("unicorns.wtf"),
-		Name:   pulumi.String("protonmail._domainkey"),
-		Ttl:    pulumi.Int(43200),
-		Type:   pulumi.String(digitalocean.RecordTypeCNAME),
-		Value:  pulumi.String("protonmail.domainkey.dryktxtupmrp5coofwzuib32r7l7msvlngqicqwbweu4szlvekd5q.domains.proton.ch."),
-	})
-	if err != nil {
-		fmt.Printf("there was an error: %v\n", err)
-		return err
-	}
-	_, err = digitalocean.NewDnsRecord(ctx, "domain-record-unicorns-wtf-cname-dkim2", &digitalocean.DnsRecordArgs{
-		Domain: pulumi.String("unicorns.wtf"),
-		Name:   pulumi.String("protonmail2._domainkey"),
-		Ttl:    pulumi.Int(43200),
-		Type:   pulumi.String(digitalocean.RecordTypeCNAME),
-		Value:  pulumi.String("protonmail2.domainkey.dryktxtupmrp5coofwzuib32r7l7msvlngqicqwbweu4szlvekd5q.domains.proton.ch."),
-	})
-	if err != nil {
-		fmt.Printf("there was an error: %v\n", err)
-		return err
-	}
-	_, err = digitalocean.NewDnsRecord(ctx, "domain-record-unicorns-wtf-cname-dkim3", &digitalocean.DnsRecordArgs{
-		Domain: pulumi.String("unicorns.wtf"),
-		Name:   pulumi.String("protonmail3._domainkey"),
-		Ttl:    pulumi.Int(43200),
-		Type:   pulumi.String(digitalocean.RecordTypeCNAME),
-		Value:  pulumi.String("protonmail3.domainkey.dryktxtupmrp5coofwzuib32r7l7msvlngqicqwbweu4szlvekd5q.domains.proton.ch."),
-	})
-	if err != nil {
-		fmt.Printf("there was an error: %v\n", err)
-		return err
+	// Create A records.
+	for i, a := range domain.A {
+		args := &digitalocean.DnsRecordArgs{
+			Domain: d.Name,
+			Type:   pulumi.String(digitalocean.RecordTypeA),
+			Name:   pulumi.String(a.Name),
+			Value:  pulumi.String(a.Target),
+		}
+		if a.TTL > 0 {
+			args.Ttl = pulumi.Int(a.TTL)
+		}
+		_, err := digitalocean.NewDnsRecord(ctx, fmt.Sprintf("do-dns-%s-a-%d", domainSlug, i), args, pulumi.Parent(component))
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return nil
+	// Create AAAA records.
+	for i, aaaa := range domain.AAAA {
+		args := &digitalocean.DnsRecordArgs{
+			Domain: d.Name,
+			Type:   pulumi.String(digitalocean.RecordTypeAAAA),
+			Name:   pulumi.String(aaaa.Name),
+			Value:  pulumi.String(aaaa.Target),
+		}
+		if aaaa.TTL > 0 {
+			args.Ttl = pulumi.Int(aaaa.TTL)
+		}
+		_, err := digitalocean.NewDnsRecord(ctx, fmt.Sprintf("do-dns-%s-aaaa-%d", domainSlug, i), args, pulumi.Parent(component))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	component.DomainName = d.Name
+
+	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
+		"domainName": d.Name,
+	}); err != nil {
+		return nil, err
+	}
+
+	return component, nil
 }

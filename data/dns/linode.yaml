@@ -1,0 +1,79 @@
+# SPDX-FileCopyrightText: 2025 e.j. sahala <ej@saha.la>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Linode-hosted DNS domain definitions.
+# Each entry creates a domain and its associated records (MX, TXT, CNAME).
+
+- domain: sahala.org
+  soaEmail: domains@sahala.org
+
+- domain: saha.la
+  soaEmail: domains@saha.la
+  mx:
+    - priority: 10
+      target: mail.protonmail.ch
+    - priority: 20
+      target: mailsec.protonmail.ch
+  txt:
+    - target: "protonmail-verification=667be840d8b900eb75aabe21850897781b4083fc"
+    - target: "v=spf1 include:_spf.protonmail.ch mx ~all"
+    - name: _dmarc
+      target: "v=DMARC1; p=none"
+  cname:
+    - name: protonmail._domainkey
+      target: protonmail.domainkey.dwyfiejqmt25ignanwa5si6rxkctauvcmvghmwwrdjj3q2ezokgeq.domains.proton.ch
+    - name: protonmail2._domainkey
+      target: protonmail2.domainkey.dwyfiejqmt25ignanwa5si6rxkctauvcmvghmwwrdjj3q2ezokgeq.domains.proton.ch
+    - name: protonmail3._domainkey
+      target: protonmail3.domainkey.dwyfiejqmt25ignanwa5si6rxkctauvcmvghmwwrdjj3q2ezokgeq.domains.proton.ch
+
+- domain: ejs.sh
+  soaEmail: domains@ejs.sh
+  mx:
+    - priority: 10
+      target: mail.protonmail.ch
+    - priority: 20
+      target: mailsec.protonmail.ch
+  txt:
+    - target: "protonmail-verification=3321abe05036b281248028d9da2b98d78d65df6e"
+    - target: "v=spf1 include:_spf.protonmail.ch mx ~all"
+    - name: _dmarc
+      target: "v=DMARC1; p=none"
+  cname:
+    - name: protonmail._domainkey
+      target: protonmail.domainkey.dg3e6xadvn5cldvphwhfcspfbrainisw7uirf5e6l4d3jyfqkbgaa.domains.proton.ch
+    - name: protonmail2._domainkey
+      target: protonmail2.domainkey.dg3e6xadvn5cldvphwhfcspfbrainisw7uirf5e6l4d3jyfqkbgaa.domains.proton.ch
+    - name: protonmail3._domainkey
+      target: protonmail3.domainkey.dg3e6xadvn5cldvphwhfcspfbrainisw7uirf5e6l4d3jyfqkbgaa.domains.proton.ch
+
+- domain: ejs.wtf
+  soaEmail: domains@ejs.wtf
+  mx:
+    - priority: 10
+      target: mail.protonmail.ch
+    - priority: 20
+      target: mailsec.protonmail.ch
+  txt:
+    - target: "protonmail-verification=861bb2edab816ab48789a843460f74021b11d175"
+    - target: "v=spf1 include:_spf.protonmail.ch mx ~all"
+    - name: _dmarc
+      target: "v=DMARC1; p=none"
+  cname:
+    - name: protonmail._domainkey
+      target: protonmail.domainkey.dijjcu5rapsqd4kwwvqg2n4pweerealedzosuhqrklurblrtgtxpq.domains.proton.ch
+    - name: protonmail2._domainkey
+      target: protonmail2.domainkey.dijjcu5rapsqd4kwwvqg2n4pweerealedzosuhqrklurblrtgtxpq.domains.proton.ch
+    - name: protonmail3._domainkey
+      target: protonmail3.domainkey.dijjcu5rapsqd4kwwvqg2n4pweerealedzosuhqrklurblrtgtxpq.domains.proton.ch
+
+- domain: octopik3s.io
+  soaEmail: hostmaster@octopik3s.io
+  mx:
+    - priority: 10
+      target: mail.protonmail.ch
+    - priority: 20
+      target: mailsec.protonmail.ch
+  txt:
+    - target: "protonmail-verification=b869e15412ae9ebda8ded7d2994b16a829d5ee12"
