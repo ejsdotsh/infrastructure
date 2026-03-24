@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: 2025 e.j. sahala <ej@saha.la>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# DigitalOcean-hosted DNS domain definitions.
+# Each entry creates a domain and its associated records (MX, TXT, CNAME, NS).
+
+- domain: panemorfos.me
+  mx:
+    - priority: 10
+      target: "mail.protonmail.ch."
+    - priority: 20
+      target: "mailsec.protonmail.ch."
+  ns:
+    - target: "ns1.digitalocean.com."
+    - target: "ns2.digitalocean.com."
+    - target: "ns3.digitalocean.com."
+  txt:
+    - target: "protonmail-verification=fdfc3be39cbcc7aad30939cc525ca6c3ee38f61b"
+
+- domain: pik3s.io
+  mx:
+    - priority: 10
+      target: "mail.protonmail.ch."
+    - priority: 20
+      target: "mailsec.protonmail.ch."
+  ns:
+    - target: "ns1.digitalocean.com."
+    - target: "ns2.digitalocean.com."
+    - target: "ns3.digitalocean.com."
+  txt:
+    - target: "protonmail-verification=91adc44d657ca96a9c7327bfe7b9b2dc80b8261b"
+
+- domain: unicorns.wtf
+  mx:
+    - priority: 10
+      target: "mail.protonmail.ch."
+    - priority: 20
+      target: "mailsec.protonmail.ch."
+  ns:
+    - target: "ns1.digitalocean.com."
+    - target: "ns2.digitalocean.com."
+    - target: "ns3.digitalocean.com."
+  txt:
+    - target: "protonmail-verification=e35f918ddaea3eae5ccb81ff300e7dd90713d5e7"
+    - target: "v=spf1 include:_spf.protonmail.ch ~all"
+    - name: _dmarc
+      target: "v=DMARC1; p=quarantine"
+  cname:
+    - name: protonmail._domainkey
+      target: "protonmail.domainkey.dryktxtupmrp5coofwzuib32r7l7msvlngqicqwbweu4szlvekd5q.domains.proton.ch."
+    - name: protonmail2._domainkey
+      target: "protonmail2.domainkey.dryktxtupmrp5coofwzuib32r7l7msvlngqicqwbweu4szlvekd5q.domains.proton.ch."
+    - name: protonmail3._domainkey
+      target: "protonmail3.domainkey.dryktxtupmrp5coofwzuib32r7l7msvlngqicqwbweu4szlvekd5q.domains.proton.ch."

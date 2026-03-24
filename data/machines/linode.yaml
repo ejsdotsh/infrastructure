@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2025 e.j. sahala <ej@saha.la>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Linode machine definitions.
+# Each entry provisions a Linode instance with its disks and config profile.
+
+- name: linode01
+  region: us-central
+  type: g6-nanode-1
+  privateIP: true
+  diskEncryption: disabled
+  alerts:
+    cpu: 90
+    io: 10000
+    networkIn: 10
+    networkOut: 10
+    transferQuota: 80
+  disks:
+    - suffix: "-disk-boot"
+      label: "Debian 10 Disk"
+      size: 25088
+      filesystem: ext4
+    - suffix: "-disk-swap"
+      label: "512 MB Swap Image"
+      size: 512
+      filesystem: swap
+  config:
+    suffix: "-config"
+    label: "My Debian 10 Disk Profile"
+    kernel: linode/grub2
+    rootDevice: /dev/sda
+    booted: true
+    helpers:
+      devtmpfsAutomount: true
+      network: false
+    deviceMap:
+      sda: "-disk-boot"
+      sdb: "-disk-swap"

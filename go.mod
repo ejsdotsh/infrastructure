@@ -10,7 +10,7 @@ require (
 	github.com/pulumi/pulumi-digitalocean/sdk/v4 v4.62.0
 	github.com/pulumi/pulumi-linode/sdk/v5 v5.9.0
 	github.com/pulumi/pulumi/sdk/v3 v3.227.0
-	resty.dev/v3 v3.0.0-beta.6
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -85,7 +85,6 @@ require (
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1 // indirect
 	github.com/sergi/go-diff v1.4.0 // indirect
 	github.com/skeema/knownhosts v1.3.2 // indirect
-	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/texttheater/golang-levenshtein v1.0.1 // indirect
@@ -120,6 +119,5 @@ require (
 	google.golang.org/grpc v1.79.3 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	lukechampine.com/frand v1.5.1 // indirect
 )

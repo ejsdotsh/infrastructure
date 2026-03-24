@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2025 e.j. sahala <ej@saha.la>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# DigitalOcean machine (droplet) definitions.
+# Each entry provisions a DigitalOcean Droplet.
+# DNS records are managed separately in data/dns/.
+
+# Example:
+# - name: web01
+#   region: nyc3
+#   size: s-1vcpu-1gb
+#   image: ubuntu-24-04-x64
+#   ipv6: true
+#   tags:
+#     - web-server

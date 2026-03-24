@@ -8,137 +8,82 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/ejsdotsh/infrastructure/src/loader"
+
+	"github.com/pulumi/pulumi-digitalocean/sdk/v4/go/digitalocean"
 	"github.com/pulumi/pulumi-linode/sdk/v5/go/linode"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
-
-// DiskDef defines a disk to be managed as a standalone InstanceDisk resource.
-type DiskDef struct {
-	// ResourceSuffix is appended to the component name to form the disk resource name.
-	ResourceSuffix string
-	// Label is the disk label.
-	Label string
-	// Size is the disk size in MB.
-	Size int
-	// Filesystem is the disk filesystem type (e.g., "ext4", "swap").
-	Filesystem string
-	// ImportID is the "linodeId,diskId" string used to import the existing disk.
-	// Leave empty if the disk is being created fresh.
-	ImportID string
-}
-
-// ConfigDef defines a config profile to be managed as a standalone InstanceConfig resource.
-type ConfigDef struct {
-	// ResourceSuffix is appended to the component name to form the config resource name.
-	ResourceSuffix string
-	// Label is the config profile label.
-	Label string
-	// Kernel is the kernel to boot (e.g., "linode/grub2").
-	Kernel string
-	// RootDevice is the root device path (e.g., "/dev/sda").
-	RootDevice string
-	// Booted indicates whether the instance should be booted into this config.
-	Booted bool
-	// Helpers configures the config profile helpers.
-	Helpers *linode.InstanceConfigHelperArgs
-	// DeviceMap maps device names (e.g., "sda", "sdb") to DiskDef ResourceSuffixes.
-	// The disk IDs are resolved from the created InstanceDisk resources.
-	DeviceMap map[string]string
-	// ImportID is the "linodeId,configId" string used to import the existing config.
-	// Leave empty if the config is being created fresh.
-	ImportID string
-}
-
-// LinodeMachineArgs defines the inputs for the LinodeMachine component.
-type LinodeMachineArgs struct {
-	// InstanceResourceName is the logical Pulumi resource name for the Linode instance.
-	// It must match the original name to preserve state via aliases.
-	InstanceResourceName string
-	// Label is the Linode instance label.
-	Label pulumi.StringInput
-	// Region is the Linode region (e.g., "us-central").
-	Region pulumi.StringInput
-	// InstanceType is the Linode plan type (e.g., "g6-nanode-1").
-	InstanceType pulumi.StringInput
-	// PrivateIP enables a private IP address on the instance.
-	PrivateIP pulumi.BoolInput
-	// Alerts configures the instance alert thresholds.
-	Alerts *linode.InstanceAlertsArgs
-	// DiskEncryption sets the disk encryption mode.
-	DiskEncryption pulumi.StringInput
-	// Disks defines the instance disks as standalone InstanceDisk resources.
-	Disks []DiskDef
-	// Config defines the instance config profile as a standalone InstanceConfig resource.
-	Config ConfigDef
-}
 
 // LinodeMachine is a component resource that groups a Linode compute instance,
 // its disks, and its configuration profile under a single logical unit.
 type LinodeMachine struct {
 	pulumi.ResourceState
 
-	// InstanceID is the Linode instance ID.
-	InstanceID pulumi.IDOutput `pulumi:"instanceId"`
-	// Label is the instance label.
-	Label pulumi.StringOutput `pulumi:"label"`
-	// IPv4 contains the instance's IPv4 addresses.
-	IPv4 pulumi.StringArrayOutput `pulumi:"ipv4"`
+	InstanceID pulumi.IDOutput          `pulumi:"instanceId"`
+	Label      pulumi.StringOutput      `pulumi:"label"`
+	IPv4       pulumi.StringArrayOutput `pulumi:"ipv4"`
 }
 
-// NewLinodeMachine creates a new LinodeMachine component resource.
-func NewLinodeMachine(ctx *pulumi.Context, name string, args *LinodeMachineArgs, opts ...pulumi.ResourceOption) (*LinodeMachine, error) {
+// NewLinodeMachine creates a new LinodeMachine component from a loader.LinodeMachine.
+func NewLinodeMachine(ctx *pulumi.Context, name string, machine loader.LinodeMachine, opts ...pulumi.ResourceOption) (*LinodeMachine, error) {
 	component := &LinodeMachine{}
-	err := ctx.RegisterComponentResource("ejsdotsh:machines:LinodeMachine", name, component, opts...)
-	if err != nil {
+	if err := ctx.RegisterComponentResource("ejsdotsh:machines:LinodeMachine", name, component, opts...); err != nil {
 		return nil, err
 	}
 
-	// Create the Linode instance as a child of this component, with an alias
-	// pointing to the old stack-root URN so Pulumi recognizes the existing resource.
-	// Deprecated embedded configs, disks, bootConfigLabel, and ipv4s have been removed.
-	instance, err := linode.NewInstance(ctx, args.InstanceResourceName, &linode.InstanceArgs{
-		Alerts:         args.Alerts,
-		DiskEncryption: args.DiskEncryption,
-		Label:          args.Label,
-		PrivateIp:      args.PrivateIP,
-		Region:         args.Region,
-		Type:           args.InstanceType,
-	}, pulumi.Parent(component),
-		pulumi.Protect(true),
-		pulumi.Aliases([]pulumi.Alias{{NoParent: pulumi.Bool(true)}}),
+	// Build instance args.
+	instanceArgs := &linode.InstanceArgs{
+		Label:     pulumi.String(machine.Name),
+		Region:    pulumi.String(machine.Region),
+		Type:      pulumi.String(machine.Type),
+		PrivateIp: pulumi.Bool(machine.PrivateIP),
+	}
+	if machine.DiskEncryption != "" {
+		instanceArgs.DiskEncryption = pulumi.String(machine.DiskEncryption)
+	}
+	if machine.Alerts != nil {
+		instanceArgs.Alerts = &linode.InstanceAlertsArgs{
+			Cpu:           pulumi.Int(machine.Alerts.CPU),
+			Io:            pulumi.Int(machine.Alerts.IO),
+			NetworkIn:     pulumi.Int(machine.Alerts.NetworkIn),
+			NetworkOut:    pulumi.Int(machine.Alerts.NetworkOut),
+			TransferQuota: pulumi.Int(machine.Alerts.TransferQuota),
+		}
+	}
+
+	// Create the Linode instance.
+	instance, err := linode.NewInstance(ctx, fmt.Sprintf("linode-instance-%s", machine.Name), instanceArgs,
+		pulumi.Parent(component),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	// Convert the instance ID from IDOutput to IntOutput for use in disk/config args.
+	// Convert instance ID for use in disk/config args.
 	linodeID := instance.ID().ApplyT(func(id pulumi.ID) (int, error) {
 		return strconv.Atoi(string(id))
 	}).(pulumi.IntOutput)
 
-	// Create standalone InstanceDisk resources, keyed by ResourceSuffix for config device mapping.
-	diskResources := make(map[string]*linode.InstanceDisk, len(args.Disks))
-	for _, d := range args.Disks {
-		diskName := fmt.Sprintf("%s%s", name, d.ResourceSuffix)
-		diskOpts := []pulumi.ResourceOption{pulumi.Parent(component)}
-		if d.ImportID != "" {
-			diskOpts = append(diskOpts, pulumi.Import(pulumi.ID(d.ImportID)))
-		}
+	// Create standalone InstanceDisk resources.
+	diskResources := make(map[string]*linode.InstanceDisk, len(machine.Disks))
+	for _, d := range machine.Disks {
+		diskName := fmt.Sprintf("linode-disk-%s%s", machine.Name, d.Suffix)
 		disk, err := linode.NewInstanceDisk(ctx, diskName, &linode.InstanceDiskArgs{
 			Label:      pulumi.String(d.Label),
 			LinodeId:   linodeID,
 			Size:       pulumi.Int(d.Size),
 			Filesystem: pulumi.String(d.Filesystem),
-		}, diskOpts...)
+		}, pulumi.Parent(component))
 		if err != nil {
 			return nil, err
 		}
-		diskResources[d.ResourceSuffix] = disk
+		diskResources[d.Suffix] = disk
 	}
 
-	// Build the device list for the InstanceConfig from the DeviceMap.
+	// Build the device list for the InstanceConfig.
 	var devices linode.InstanceConfigDeviceArray
-	for deviceName, diskSuffix := range args.Config.DeviceMap {
+	for deviceName, diskSuffix := range machine.Config.DeviceMap {
 		disk, ok := diskResources[diskSuffix]
 		if !ok {
 			return nil, fmt.Errorf("config device %q references unknown disk suffix %q", deviceName, diskSuffix)
@@ -149,25 +94,29 @@ func NewLinodeMachine(ctx *pulumi.Context, name string, args *LinodeMachineArgs,
 		})
 	}
 
-	// Create the standalone InstanceConfig resource.
-	cfgName := fmt.Sprintf("%s%s", name, args.Config.ResourceSuffix)
-	cfgOpts := []pulumi.ResourceOption{pulumi.Parent(component)}
-	if args.Config.ImportID != "" {
-		cfgOpts = append(cfgOpts, pulumi.Import(pulumi.ID(args.Config.ImportID)))
-	}
+	// Build config helpers.
 	helpers := linode.InstanceConfigHelperArray{}
-	if args.Config.Helpers != nil {
-		helpers = linode.InstanceConfigHelperArray{args.Config.Helpers}
+	if machine.Config.Helpers.DevtmpfsAutomount != nil || machine.Config.Helpers.Network != nil {
+		helperArgs := &linode.InstanceConfigHelperArgs{}
+		if machine.Config.Helpers.DevtmpfsAutomount != nil {
+			helperArgs.DevtmpfsAutomount = pulumi.Bool(*machine.Config.Helpers.DevtmpfsAutomount)
+		}
+		if machine.Config.Helpers.Network != nil {
+			helperArgs.Network = pulumi.Bool(*machine.Config.Helpers.Network)
+		}
+		helpers = linode.InstanceConfigHelperArray{helperArgs}
 	}
-	_, err = linode.NewInstanceConfig(ctx, cfgName, &linode.InstanceConfigArgs{
+
+	// Create the standalone InstanceConfig resource.
+	_, err = linode.NewInstanceConfig(ctx, fmt.Sprintf("linode-config-%s%s", machine.Name, machine.Config.Suffix), &linode.InstanceConfigArgs{
 		LinodeId:   linodeID,
-		Label:      pulumi.String(args.Config.Label),
-		Kernel:     pulumi.String(args.Config.Kernel),
-		RootDevice: pulumi.String(args.Config.RootDevice),
-		Booted:     pulumi.Bool(args.Config.Booted),
+		Label:      pulumi.String(machine.Config.Label),
+		Kernel:     pulumi.String(machine.Config.Kernel),
+		RootDevice: pulumi.String(machine.Config.RootDevice),
+		Booted:     pulumi.Bool(machine.Config.Booted),
 		Device:     devices,
 		Helpers:    helpers,
-	}, cfgOpts...)
+	}, pulumi.Parent(component))
 	if err != nil {
 		return nil, err
 	}
@@ -180,6 +129,61 @@ func NewLinodeMachine(ctx *pulumi.Context, name string, args *LinodeMachineArgs,
 		"instanceId": instance.ID(),
 		"label":      instance.Label,
 		"ipv4":       instance.Ipv4s,
+	}); err != nil {
+		return nil, err
+	}
+
+	return component, nil
+}
+
+// DODroplet is a component resource for a DigitalOcean Droplet.
+// DNS is managed separately in the dns package.
+type DODroplet struct {
+	pulumi.ResourceState
+
+	DropletID   pulumi.IntOutput         `pulumi:"dropletId"`
+	IPv4Address pulumi.StringOutput      `pulumi:"ipv4Address"`
+	IPv6Address pulumi.StringOutput      `pulumi:"ipv6Address"`
+	Tags        pulumi.StringArrayOutput `pulumi:"tags"`
+}
+
+// NewDODroplet creates a new DODroplet component from a loader.DODroplet.
+func NewDODroplet(ctx *pulumi.Context, name string, droplet loader.DODroplet, opts ...pulumi.ResourceOption) (*DODroplet, error) {
+	component := &DODroplet{}
+	if err := ctx.RegisterComponentResource("ejsdotsh:machines:DODroplet", name, component, opts...); err != nil {
+		return nil, err
+	}
+
+	// Build tags.
+	var tags pulumi.StringArray
+	for _, t := range droplet.Tags {
+		tags = append(tags, pulumi.String(t))
+	}
+
+	// Create the DigitalOcean Droplet.
+	d, err := digitalocean.NewDroplet(ctx, fmt.Sprintf("do-droplet-%s", droplet.Name), &digitalocean.DropletArgs{
+		Image:  pulumi.String(droplet.Image),
+		Region: pulumi.String(droplet.Region),
+		Size:   pulumi.String(droplet.Size),
+		Ipv6:   pulumi.Bool(droplet.IPv6),
+		Tags:   tags,
+	}, pulumi.Parent(component))
+	if err != nil {
+		return nil, err
+	}
+
+	component.DropletID = d.ID().ApplyT(func(id pulumi.ID) (int, error) {
+		return strconv.Atoi(string(id))
+	}).(pulumi.IntOutput)
+	component.IPv4Address = d.Ipv4Address
+	component.IPv6Address = d.Ipv6Address
+	component.Tags = d.Tags
+
+	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
+		"dropletId":   d.ID(),
+		"ipv4Address": d.Ipv4Address,
+		"ipv6Address": d.Ipv6Address,
+		"tags":        d.Tags,
 	}); err != nil {
 		return nil, err
 	}
