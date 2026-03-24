@@ -6,10 +6,10 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	unet "github.com/ejsdotsh/infrastructure/network"
 	"github.com/ejsdotsh/infrastructure/src/dns"
+	"github.com/ejsdotsh/infrastructure/src/loader"
 	"github.com/ejsdotsh/infrastructure/src/machines"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -17,56 +17,82 @@ import (
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
-		ctx.Log.Info(("=== PRE-CHECKS: load ENV vars ==="), nil)
-		// Ensure that the required environment variables are set
-		// if err := CheckRequiredEnvVars(); err != nil {
-		// 	ctx.Log.Error((fmt.Sprintf("=== PHASE 1: ERROR ===\n\n%v", err)), nil)
-		// 	panic(err)
-		// }
+		// Load data files.
+		ctx.Log.Info("=== Loading data files ===", nil)
 
-		// Initialize the Netbox client (reads NETBOX_URL/TOKEN from env)
-		ctx.Log.Info(("=== PHASE 1: initialize inventory client ==="), nil)
-		// ntbx := netbox.NewClient()
-		// cctx := context.Background()
-
-		ctx.Log.Info(("=== PHASE 1.a: getting inventory data ==="), nil)
-
-		// ctx.Log.Info("Getting DNS Domains and Records from Netbox", nil)
-		// zones, err := ntbx.ListZones(cctx)
-		// if err != nil {
-		// 	ctx.Log.Error((fmt.Sprintf("=== ERROR pulling from Netbox ===\n\n%v", err)), nil)
-		// 	return err
-		// }
-
-		// Create DNS domains, MX, CNAME DKIM records
-		ctx.Log.Info(("=== PHASE 2: manage DNS ==="), nil)
-		// for _, z := range zones {
-		// 	prov := providerFromTags([]string{}) // empty slice
-		// }
-		if err := dns.ManageDomains(ctx); err != nil {
-			ctx.Log.Error((fmt.Sprintf("=== PHASE 2: ERROR ===\n\n%v", err)), nil)
-			return err
-		}
-
-		// Create the Machines
-		ctx.Log.Info(("=== PHASE 3: manage machines ==="), nil)
-		if err := machines.ManageMachines(ctx); err != nil {
-			ctx.Log.Error((fmt.Sprintf("=== PHASE 3: ERROR ===\n\n%v", err)), nil)
-			return err
-		}
-
-		ctx.Log.Info(("=== PHASE 4: manage network ==="), nil)
-		if err := unet.ManageNetwork(); err != nil {
-			ctx.Log.Error((fmt.Sprintf("=== PHASE 4: ERROR ===\n\n%v", err)), nil)
-			return (err)
-		}
-
-		// write a README to the project
-		readmeBytes, err := os.ReadFile("README.md")
+		allMachines, err := loader.LoadMachines("data/machines.yaml")
 		if err != nil {
-			return fmt.Errorf("failed to read readme: %w", err)
+			return fmt.Errorf("loading machines: %w", err)
 		}
-		ctx.Export("readme", pulumi.String(string(readmeBytes)))
+
+		allDomains, err := loader.LoadDomains("data/dns.yaml")
+		if err != nil {
+			return fmt.Errorf("loading domains: %w", err)
+		}
+
+		ctx.Log.Info(fmt.Sprintf("Loaded %d machines, %d domains", len(allMachines), len(allDomains)), nil)
+
+		// Manage DNS domains and records.
+		ctx.Log.Info("=== Managing DNS ===", nil)
+		if err := dns.ManageDomains(ctx, allDomains); err != nil {
+			return fmt.Errorf("managing DNS: %w", err)
+		}
+
+		// Manage compute resources.
+		ctx.Log.Info("=== Managing machines ===", nil)
+		machineOutputs, err := machines.ManageMachines(ctx, allMachines)
+		if err != nil {
+			return fmt.Errorf("managing machines: %w", err)
+		}
+
+		// Export machine IP addresses and build a summary.
+		readmeLines := pulumi.StringArray{
+			pulumi.String("# Infrastructure\n\n"),
+			pulumi.String("## Machines\n\n"),
+			pulumi.String("| Name | Provider | IPv4 |\n"),
+			pulumi.String("|------|----------|------|\n"),
+		}
+
+		for _, mo := range machineOutputs {
+			// Export each machine's IPv4 address.
+			ctx.Export(fmt.Sprintf("%s-ipv4", mo.Name), mo.IPv4Address)
+
+			// Build a table row for the README.
+			row := mo.IPv4Address.ApplyT(func(ip string) string {
+				return fmt.Sprintf("| %s | %s | %s |\n", mo.Name, mo.Provider, ip)
+			}).(pulumi.StringOutput)
+			readmeLines = append(readmeLines, row)
+		}
+
+		readmeLines = append(readmeLines,
+			pulumi.Sprintf("\n## Domains (%d)\n\n", len(allDomains)),
+		)
+		for _, d := range allDomains {
+			readmeLines = append(readmeLines,
+				pulumi.String(fmt.Sprintf("- %s (%s)\n", d.DomainName, d.Provider)),
+			)
+		}
+
+		// Join all lines into a single readme output.
+		readme := pulumi.All(readmeLines).ApplyT(func(args []interface{}) string {
+			var result string
+			for _, a := range args {
+				if lines, ok := a.([]interface{}); ok {
+					for _, line := range lines {
+						result += line.(string)
+					}
+				}
+			}
+			return result
+		}).(pulumi.StringOutput)
+
+		ctx.Export("readme", readme)
+
+		// Manage network devices.
+		ctx.Log.Info("=== Managing network ===", nil)
+		if err := unet.ManageNetwork(); err != nil {
+			return fmt.Errorf("managing network: %w", err)
+		}
 
 		return nil
 	})

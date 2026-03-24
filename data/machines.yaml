@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: 2025 e.j. sahala <ej@saha.la>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Machine definitions.
+# Each entry provisions a compute instance on the specified provider.
+# The 'provider' field determines which cloud provider to use.
+
+- name: linode01
+  provider: linode
+  region: us-central
+  type: g6-nanode-1
+  privateIP: true
+  diskEncryption: disabled
+  alerts:
+    cpu: 90
+    io: 10000
+    networkIn: 10
+    networkOut: 10
+    transferQuota: 80
+  disks:
+    - suffix: "-disk-boot"
+      label: "Debian 10 Disk"
+      size: 25088
+      filesystem: ext4
+    - suffix: "-disk-swap"
+      label: "512 MB Swap Image"
+      size: 512
+      filesystem: swap
+  config:
+    suffix: "-config"
+    label: "My Debian 10 Disk Profile"
+    kernel: linode/grub2
+    rootDevice: /dev/sda
+    booted: true
+    helpers:
+      devtmpfsAutomount: true
+      network: false
+    deviceMap:
+      sda: "-disk-boot"
+      sdb: "-disk-swap"
+
+# Example DigitalOcean droplet:
+# - name: web01
+#   provider: digitalocean
+#   region: nyc3
+#   size: s-1vcpu-1gb
+#   image: ubuntu-24-04-x64
+#   ipv6: true
+#   tags:
+#     - web-server
