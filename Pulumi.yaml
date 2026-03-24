@@ -3,12 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name: infrastructure
-description: reanimating my personal infrastructure...
+description: reanimating my personal infrastructure...with Pulumi, Go, and CUE
 runtime: go
 main: main.go
 config:
   pulumi:autonaming:
     value:
       mode: default
-
-variables:

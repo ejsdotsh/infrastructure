@@ -29,6 +29,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 			Name: pulumi.String(domainName),
 		})
 		if err != nil {
+			fmt.Printf("there was an error: %v\n", err)
 			return err
 		}
 		// Add MX records
@@ -42,6 +43,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 			Ttl:      pulumi.Int(14400),
 		})
 		if err != nil {
+			fmt.Printf("there was an error: %v\n", err)
 			return err
 		}
 		_, err = digitalocean.NewDnsRecord(ctx, resourceName+"-mx2", &digitalocean.DnsRecordArgs{
@@ -53,6 +55,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 			Ttl:      pulumi.Int(14400),
 		})
 		if err != nil {
+			fmt.Printf("there was an error: %v\n", err)
 			return err
 		}
 		// Add NS records
@@ -65,6 +68,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 				Ttl:    pulumi.Int(1800),
 			})
 			if err != nil {
+				fmt.Printf("there was an error: %v\n", err)
 				return err
 			}
 		}
@@ -79,6 +83,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 		Value:  pulumi.String("protonmail-verification=fdfc3be39cbcc7aad30939cc525ca6c3ee38f61b"),
 	})
 	if err != nil {
+		fmt.Printf("there was an error: %v\n", err)
 		return err
 	}
 	_, err = digitalocean.NewDnsRecord(ctx, "domain-record-pik3s-io-txt-protonmail-verification", &digitalocean.DnsRecordArgs{
@@ -89,6 +94,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 		Value:  pulumi.String("protonmail-verification=91adc44d657ca96a9c7327bfe7b9b2dc80b8261b"),
 	})
 	if err != nil {
+		fmt.Printf("there was an error: %v\n", err)
 		return err
 	}
 	_, err = digitalocean.NewDnsRecord(ctx, "domain-record-unicorns-wtf-txt-protonmail-verification", &digitalocean.DnsRecordArgs{
@@ -99,6 +105,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 		Value:  pulumi.String("protonmail-verification=e35f918ddaea3eae5ccb81ff300e7dd90713d5e7"),
 	})
 	if err != nil {
+		fmt.Printf("there was an error: %v\n", err)
 		return err
 	}
 
@@ -110,6 +117,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 		Value:  pulumi.String("v=spf1 include:_spf.protonmail.ch ~all"),
 	})
 	if err != nil {
+		fmt.Printf("there was an error: %v\n", err)
 		return err
 	}
 	_, err = digitalocean.NewDnsRecord(ctx, "domain-record-unicorns-wtf-txt-dmarc", &digitalocean.DnsRecordArgs{
@@ -120,6 +128,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 		Value:  pulumi.String("v=DMARC1; p=quarantine"),
 	})
 	if err != nil {
+		fmt.Printf("there was an error: %v\n", err)
 		return err
 	}
 
@@ -132,6 +141,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 		Value:  pulumi.String("protonmail.domainkey.dryktxtupmrp5coofwzuib32r7l7msvlngqicqwbweu4szlvekd5q.domains.proton.ch."),
 	})
 	if err != nil {
+		fmt.Printf("there was an error: %v\n", err)
 		return err
 	}
 	_, err = digitalocean.NewDnsRecord(ctx, "domain-record-unicorns-wtf-cname-dkim2", &digitalocean.DnsRecordArgs{
@@ -142,6 +152,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 		Value:  pulumi.String("protonmail2.domainkey.dryktxtupmrp5coofwzuib32r7l7msvlngqicqwbweu4szlvekd5q.domains.proton.ch."),
 	})
 	if err != nil {
+		fmt.Printf("there was an error: %v\n", err)
 		return err
 	}
 	_, err = digitalocean.NewDnsRecord(ctx, "domain-record-unicorns-wtf-cname-dkim3", &digitalocean.DnsRecordArgs{
@@ -152,6 +163,7 @@ func manageDigitalOceanDNS(ctx *pulumi.Context) error {
 		Value:  pulumi.String("protonmail3.domainkey.dryktxtupmrp5coofwzuib32r7l7msvlngqicqwbweu4szlvekd5q.domains.proton.ch."),
 	})
 	if err != nil {
+		fmt.Printf("there was an error: %v\n", err)
 		return err
 	}
 
