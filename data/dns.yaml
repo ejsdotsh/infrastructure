@@ -1,0 +1,137 @@
+# SPDX-FileCopyrightText: 2025 e.j. sahala <ej@saha.la>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# DNS domain definitions.
+# Each entry creates a domain and its associated records on the specified provider.
+# The 'provider' field determines which cloud DNS provider to use.
+
+- domain: sahala.org
+  provider: linode
+  soaEmail: domains@sahala.org
+
+- domain: saha.la
+  provider: linode
+  soaEmail: domains@saha.la
+  mx:
+    - priority: 10
+      target: mail.protonmail.ch
+    - priority: 20
+      target: mailsec.protonmail.ch
+  txt:
+    - target: "protonmail-verification=667be840d8b900eb75aabe21850897781b4083fc"
+    - target: "v=spf1 include:_spf.protonmail.ch mx ~all"
+    - name: _dmarc
+      target: "v=DMARC1; p=none"
+  cname:
+    - name: protonmail._domainkey
+      target: protonmail.domainkey.dwyfiejqmt25ignanwa5si6rxkctauvcmvghmwwrdjj3q2ezokgeq.domains.proton.ch
+    - name: protonmail2._domainkey
+      target: protonmail2.domainkey.dwyfiejqmt25ignanwa5si6rxkctauvcmvghmwwrdjj3q2ezokgeq.domains.proton.ch
+    - name: protonmail3._domainkey
+      target: protonmail3.domainkey.dwyfiejqmt25ignanwa5si6rxkctauvcmvghmwwrdjj3q2ezokgeq.domains.proton.ch
+
+- domain: ejs.sh
+  provider: linode
+  soaEmail: domains@ejs.sh
+  mx:
+    - priority: 10
+      target: mail.protonmail.ch
+    - priority: 20
+      target: mailsec.protonmail.ch
+  txt:
+    - target: "protonmail-verification=3321abe05036b281248028d9da2b98d78d65df6e"
+    - target: "v=spf1 include:_spf.protonmail.ch mx ~all"
+    - name: _dmarc
+      target: "v=DMARC1; p=none"
+  cname:
+    - name: protonmail._domainkey
+      target: protonmail.domainkey.dg3e6xadvn5cldvphwhfcspfbrainisw7uirf5e6l4d3jyfqkbgaa.domains.proton.ch
+    - name: protonmail2._domainkey
+      target: protonmail2.domainkey.dg3e6xadvn5cldvphwhfcspfbrainisw7uirf5e6l4d3jyfqkbgaa.domains.proton.ch
+    - name: protonmail3._domainkey
+      target: protonmail3.domainkey.dg3e6xadvn5cldvphwhfcspfbrainisw7uirf5e6l4d3jyfqkbgaa.domains.proton.ch
+
+- domain: ejs.wtf
+  provider: linode
+  soaEmail: domains@ejs.wtf
+  mx:
+    - priority: 10
+      target: mail.protonmail.ch
+    - priority: 20
+      target: mailsec.protonmail.ch
+  txt:
+    - target: "protonmail-verification=861bb2edab816ab48789a843460f74021b11d175"
+    - target: "v=spf1 include:_spf.protonmail.ch mx ~all"
+    - name: _dmarc
+      target: "v=DMARC1; p=none"
+  cname:
+    - name: protonmail._domainkey
+      target: protonmail.domainkey.dijjcu5rapsqd4kwwvqg2n4pweerealedzosuhqrklurblrtgtxpq.domains.proton.ch
+    - name: protonmail2._domainkey
+      target: protonmail2.domainkey.dijjcu5rapsqd4kwwvqg2n4pweerealedzosuhqrklurblrtgtxpq.domains.proton.ch
+    - name: protonmail3._domainkey
+      target: protonmail3.domainkey.dijjcu5rapsqd4kwwvqg2n4pweerealedzosuhqrklurblrtgtxpq.domains.proton.ch
+
+- domain: octopik3s.io
+  provider: linode
+  soaEmail: hostmaster@octopik3s.io
+  mx:
+    - priority: 10
+      target: mail.protonmail.ch
+    - priority: 20
+      target: mailsec.protonmail.ch
+  txt:
+    - target: "protonmail-verification=b869e15412ae9ebda8ded7d2994b16a829d5ee12"
+
+- domain: panemorfos.me
+  provider: digitalocean
+  mx:
+    - priority: 10
+      target: "mail.protonmail.ch."
+    - priority: 20
+      target: "mailsec.protonmail.ch."
+  ns:
+    - target: "ns1.digitalocean.com."
+    - target: "ns2.digitalocean.com."
+    - target: "ns3.digitalocean.com."
+  txt:
+    - target: "protonmail-verification=fdfc3be39cbcc7aad30939cc525ca6c3ee38f61b"
+
+- domain: pik3s.io
+  provider: digitalocean
+  mx:
+    - priority: 10
+      target: "mail.protonmail.ch."
+    - priority: 20
+      target: "mailsec.protonmail.ch."
+  ns:
+    - target: "ns1.digitalocean.com."
+    - target: "ns2.digitalocean.com."
+    - target: "ns3.digitalocean.com."
+  txt:
+    - target: "protonmail-verification=91adc44d657ca96a9c7327bfe7b9b2dc80b8261b"
+
+- domain: unicorns.wtf
+  provider: digitalocean
+  mx:
+    - priority: 10
+      target: "mail.protonmail.ch."
+    - priority: 20
+      target: "mailsec.protonmail.ch."
+  ns:
+    - target: "ns1.digitalocean.com."
+    - target: "ns2.digitalocean.com."
+    - target: "ns3.digitalocean.com."
+  txt:
+    - target: "protonmail-verification=e35f918ddaea3eae5ccb81ff300e7dd90713d5e7"
+    - target: "v=spf1 include:_spf.protonmail.ch ~all"
+    - name: _dmarc
+      target: "v=DMARC1; p=quarantine"
+  cname:
+    - name: protonmail._domainkey
+      target: "protonmail.domainkey.dryktxtupmrp5coofwzuib32r7l7msvlngqicqwbweu4szlvekd5q.domains.proton.ch."
+    - name: protonmail2._domainkey
+      target: "protonmail2.domainkey.dryktxtupmrp5coofwzuib32r7l7msvlngqicqwbweu4szlvekd5q.domains.proton.ch."
+    - name: protonmail3._domainkey
+      target: "protonmail3.domainkey.dryktxtupmrp5coofwzuib32r7l7msvlngqicqwbweu4szlvekd5q.domains.proton.ch."

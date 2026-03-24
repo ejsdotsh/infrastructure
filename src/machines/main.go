@@ -6,60 +6,54 @@
 package machines
 
 import (
-	"encoding/json"
 	"fmt"
 
+	"github.com/ejsdotsh/infrastructure/src/loader"
+
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 )
 
-// Machine is a simple definition of a compute resource.
-type Machine struct {
-	Name      pulumi.String   `json:"machineName"`
-	Type      pulumi.String   `json:"machineType"` // one of, `vm`, `lxc`, `pod`
-	Provider  pulumi.String   `json:"machineProvider"`
-	Region    pulumi.String   `json:"machineRegion"`
-	Size      pulumi.String   `json:"machineSize"`
-	IP4       []pulumi.String `json:"ip4"`
-	IP6       []pulumi.String `json:"ip6"`
-	PrivateIP pulumi.Bool     `json:"privateIP"`
+// MachineOutput captures the outputs from a provisioned machine.
+type MachineOutput struct {
+	Name        string
+	Provider    string
+	IPv4Address pulumi.StringOutput
+	IPv6Address pulumi.StringOutput
 }
 
-// ManageMachines sets up all virtual machines, containers, and compute resources.
-func ManageMachines(ctx *pulumi.Context) error {
-	// create a new Pulumi Config
-	config := config.New(ctx, "")
-	machineData := config.Get("machines")
+// ManageMachines provisions all compute resources, dispatching by provider.
+// Returns a slice of MachineOutput for use in DNS A record creation and exports.
+func ManageMachines(ctx *pulumi.Context, machines []loader.Machine) ([]MachineOutput, error) {
+	var outputs []MachineOutput
 
-	var machines []Machine
-	if err := json.Unmarshal([]byte(machineData), &machines); err != nil {
-		return err
-	}
-
-	ctx.Log.Info(fmt.Sprintf("provisioning %d machines\n", len(machines)), nil)
 	for _, machine := range machines {
 		switch machine.Provider {
-		case "linode":
-			if err := manageLinodeMachines(ctx, machine); err != nil {
-				return err
+		case loader.ProviderLinode:
+			lm, err := NewLinodeMachine(ctx, fmt.Sprintf("machine-linode-%s", machine.Name), machine)
+			if err != nil {
+				return nil, fmt.Errorf("linode machine %s: %w", machine.Name, err)
 			}
-		case "do":
-			// fmt.Printf("manageDOMachines(%v)\n", machine)
-			if err := manageDOMachines(ctx, machine); err != nil {
-				return err
+			outputs = append(outputs, MachineOutput{
+				Name:        machine.Name,
+				Provider:    machine.Provider,
+				IPv4Address: lm.IPv4.Index(pulumi.Int(0)),
+				IPv6Address: pulumi.String("").ToStringOutput(), // Linode IPv6 via separate RDNS; placeholder.
+			})
+		case loader.ProviderDigitalOcean:
+			d, err := NewDODroplet(ctx, fmt.Sprintf("machine-do-%s", machine.Name), machine)
+			if err != nil {
+				return nil, fmt.Errorf("do droplet %s: %w", machine.Name, err)
 			}
-
+			outputs = append(outputs, MachineOutput{
+				Name:        machine.Name,
+				Provider:    machine.Provider,
+				IPv4Address: d.IPv4Address,
+				IPv6Address: d.IPv6Address,
+			})
+		default:
+			return nil, fmt.Errorf("unknown machine provider %q for %s", machine.Provider, machine.Name)
 		}
 	}
 
-	// Provision and configure NAS
-	// Provision and configure switches
-
-	// Provision and configure octopik3s Kubernetes cluster
-	// if err := unicornsland.SetupUnicornsLANd(ctx); err != nil {
-	// 	return err
-	// }
-
-	return nil
-
+	return outputs, nil
 }
