@@ -15,20 +15,27 @@ import (
 )
 
 func main() {
+	// Ensure that the required environment variables are set
+	// if err := CheckRequiredEnvVars(); err != nil {
+	// 	ctx.Log.Error((fmt.Sprintf("=== PHASE 1: ERROR ===\n\n%v", err)), nil)
+	// 	panic(err)
+	// }
+
+	// result, err := unet.NetworkManager()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println(result.Result())
+
 	pulumi.Run(func(ctx *pulumi.Context) error {
-		// Ensure that the required environment variables are set
 		ctx.Log.Info(("=== PRE-CHECKS: load ENV vars ==="), nil)
-		// if err := checkRequiredEnvVars(); err != nil {
-		// 	ctx.Log.Error((fmt.Sprintf("=== PHASE 1: ERROR ===\n\n%v", err)), nil)
-		// 	return err
-		// }
 
 		// Initialize the Netbox client (reads NETBOX_URL/TOKEN from env)
-		ctx.Log.Info(("=== PHASE 1: Initialize Netbox client ==="), nil)
+		ctx.Log.Info(("=== PHASE 1: initialize inventory client ==="), nil)
 		// ntbx := netbox.NewClient()
 		// cctx := context.Background()
 
-		ctx.Log.Info("Getting DNS Domains and Records from Netbox", nil)
+		// ctx.Log.Info("Getting DNS Domains and Records from Netbox", nil)
 		// zones, err := ntbx.ListZones(cctx)
 		// if err != nil {
 		// 	ctx.Log.Error((fmt.Sprintf("=== ERROR pulling from Netbox ===\n\n%v", err)), nil)

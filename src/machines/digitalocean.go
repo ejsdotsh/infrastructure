@@ -1,6 +1,8 @@
 package machines
 
 import (
+	"fmt"
+
 	"github.com/pulumi/pulumi-digitalocean/sdk/v4/go/digitalocean"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
@@ -105,3 +107,8 @@ func NewDOMachine(
 // 		return nil
 // 	})
 // }
+
+func manageDOMachines(ctx *pulumi.Context, m Machine) error {
+	fmt.Println("i manage machines on DO")
+	return nil
+}

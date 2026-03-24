@@ -9,8 +9,8 @@ import (
 	"os"
 )
 
-// checkRequiredEnvVars checks that all required environment variables are set.
-func checkRequiredEnvVars() error {
+// CheckRequiredEnvVars checks that all required environment variables are set.
+func CheckRequiredEnvVars() error {
 	required := []string{
 		"DIGITALOCEAN_TOKEN",
 		"NETBOX_TOKEN",
